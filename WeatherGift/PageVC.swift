@@ -12,6 +12,7 @@ class PageVC: UIPageViewController {
     var currentPage = 0
     var locationsArray = ["Local city", "Sydney, Australia", "Dublin, Ireland"]
     var pageControl: UIPageControl!
+    var listButton: UIButton!
     var barButtonWidth: CGFloat = 44
     var barButtonHeight: CGFloat = 44
 
@@ -25,6 +26,7 @@ class PageVC: UIPageViewController {
     override func viewDidAppear(_ animated: Bool){
         super.viewDidAppear(animated)
         configurePageControl()
+        configureListButton()
     }
     func configurePageControl(){
         let pageControlHeight: CGFloat = barButtonHeight
@@ -37,8 +39,23 @@ class PageVC: UIPageViewController {
         pageControl.currentPageIndicatorTintColor = UIColor.black
         pageControl.numberOfPages = locationsArray.count
         pageControl.currentPage = currentPage
+        pageControl.addTarget(self, action: #selector(pageControlPressed), for: .touchUpInside)
         view.addSubview(pageControl)
     }
+    
+    func configureListButton(){
+        let safeHeight = view.frame.height - view.safeAreaInsets.bottom
+        listButton = UIButton(frame: CGRect(x: (view.frame.width - barButtonWidth), y: (safeHeight - barButtonHeight), width: barButtonWidth, height: barButtonHeight))
+        listButton.setImage(UIImage(named: "listButton.png"), for: .normal)
+        listButton.setImage(UIImage(named: "listButton-Highlighted.png"), for: .highlighted)
+        listButton.addTarget(self, action: #selector(segueToLocationVC), for: .touchUpInside)
+        view.addSubview(listButton)
+    }
+    
+    @objc func segueToLocationVC(){
+        print("Hey you clicked me!")
+    }
+    
     func createDetailVC (forPage page: Int) -> DetailVC {
         currentPage = min(max(0, page), locationsArray.count - 1)
         
@@ -73,6 +90,16 @@ extension PageVC: UIPageViewControllerDataSource, UIPageViewControllerDelegate{
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
         if let currentViewController = pageViewController.viewControllers?[0] as? DetailVC {
             pageControl.currentPage = currentViewController.currentPage
+        }
+    }
+    
+    @objc func pageControlPressed(){
+        guard let currentViewController = self.viewControllers?[0] as? DetailVC else {return}
+        currentPage = currentViewController.currentPage
+        if pageControl.currentPage < currentPage {
+            setViewControllers([createDetailVC(forPage:pageControl.currentPage)], direction: .reverse, animated: true, completion: nil)
+        } else if pageControl.currentPage > currentPage {
+            setViewControllers([createDetailVC(forPage: pageControl.currentPage)], direction: .forward, animated: true, completion: nil)
         }
     }
     
