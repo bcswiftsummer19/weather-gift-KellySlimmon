@@ -42,6 +42,7 @@ class PageVC: UIPageViewController {
         pageControl = UIPageControl(frame: CGRect(x: ((view.frame.width - pageControlWidth)/2), y: (safeHeight - pageControlHeight), width: pageControlWidth, height: pageControlHeight))
         pageControl.pageIndicatorTintColor = UIColor.lightGray
         pageControl.currentPageIndicatorTintColor = UIColor.black
+        pageControl.backgroundColor =  UIColor.white
         pageControl.numberOfPages = locationsArray.count
         pageControl.currentPage = currentPage
         pageControl.addTarget(self, action: #selector(pageControlPressed), for: .touchUpInside)
@@ -67,6 +68,8 @@ class PageVC: UIPageViewController {
         setViewControllers([createDetailVC(forPage: currentPage)], direction: .forward, animated: false, completion: nil)
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?){
+        guard let currentViewController = self.viewControllers?[0] as? DetailVC else {return}
+        locationsArray = currentViewController.locationsArray
         if segue.identifier == "ToListVC" {
             let destination = segue.destination as! ListVC
             destination.locationsArray = locationsArray
